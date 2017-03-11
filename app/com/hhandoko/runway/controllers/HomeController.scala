@@ -19,6 +19,10 @@ package com.hhandoko.runway.controllers
 
 import javax.inject._
 
+import akka.actor.{ActorSystem, Props}
+import com.hhandoko.runway.process.ProcessRunner
+import com.hhandoko.runway.process.ProcessRunner.{Run, Stop}
+
 import play.api.mvc._
 
 /**
@@ -26,7 +30,9 @@ import play.api.mvc._
  * application's home page.
  */
 @Singleton
-class HomeController @Inject() extends Controller {
+class HomeController @Inject() (system: ActorSystem) extends Controller {
+
+  val runner = system.actorOf(Props[ProcessRunner], "runner")
 
   /**
    * Create an Action to render an HTML page.
@@ -37,6 +43,16 @@ class HomeController @Inject() extends Controller {
    */
   def index = Action { implicit request =>
     Ok(views.html.index())
+  }
+
+  def start = Action { implicit request =>
+    runner ! Run
+    Ok(views.html.index("Started"))
+  }
+
+  def stop = Action { implicit request =>
+    runner ! Stop
+    Ok(views.html.index("Stopped"))
   }
 
 }

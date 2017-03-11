@@ -15,10 +15,18 @@
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 *@
-@()
+@(output: String = "")
 
 @main("Welcome to Play") {
 
     <h1>Welcome to Play!</h1>
+
+    @if(output.nonEmpty) {
+        <ul>
+            @for(line <- output.split("\n")) {
+                <li>@line</li>
+            }
+        </ul>
+    }
 
 }
