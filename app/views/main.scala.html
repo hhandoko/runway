@@ -14,9 +14,17 @@
 *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
+*
+*
+* Main template.
+*
+* @param title The page title.
+* @param content The page content body.
+* @param request The HTTP request.
+* @param flash The session flash.
 *@
 @import com.hhandoko.runway.controllers.{routes => appRoutes}
-@(title: String)(content: Html)
+@(title: String)(content: Html)(implicit request: RequestHeader, flash: Flash)
 
 <!DOCTYPE html>
 <html lang="en">
@@ -30,6 +38,11 @@
         <a href="@appRoutes.HomeController.index">Home</a> |
         <a href="@appRoutes.HomeController.start">Start</a> |
         <a href="@appRoutes.HomeController.stop">Stop</a>
+
+
+        @flash.get("success").map { msg =>
+            <div>@msg</div>
+        }
 
         @content
 

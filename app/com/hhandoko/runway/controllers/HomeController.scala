@@ -19,40 +19,54 @@ package com.hhandoko.runway.controllers
 
 import javax.inject._
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import com.hhandoko.runway.process.ProcessRunner
-import com.hhandoko.runway.process.ProcessRunner.{Run, Stop}
+import com.hhandoko.runway.process.ProcessRunner.{Start, Stop}
 
 import play.api.mvc._
 
 /**
- * This controller creates an `Action` to handle HTTP requests to the
- * application's home page.
+ * Homepage / landing page controller.
+ *
+ * @param system The actor system.
  */
 @Singleton
 class HomeController @Inject() (system: ActorSystem) extends Controller {
 
-  val runner = system.actorOf(Props[ProcessRunner], "runner")
+  /** Process runner actor */
+  val runner: ActorRef = system.actorOf(Props[ProcessRunner], "runner")
 
   /**
-   * Create an Action to render an HTML page.
+   * GET `/`
    *
-   * The configuration in the `routes` file means that this method
-   * will be called when the application receives a `GET` request with
-   * a path of `/`.
+   * @return Homepage / landing page.
    */
-  def index = Action { implicit request =>
+  def index: Action[AnyContent] = Action { implicit request =>
     Ok(views.html.index())
   }
 
-  def start = Action { implicit request =>
-    runner ! Run
-    Ok(views.html.index("Started"))
+  /**
+   * GET `/start`
+   * Handles an application start command.
+   *
+   * @return Redirect to landing page if successful.
+   */
+  def start: Action[AnyContent] = Action { implicit request =>
+    runner ! Start
+    Redirect(routes.HomeController.index())
+      .flashing("success" -> "Application started")
   }
 
-  def stop = Action { implicit request =>
+  /**
+   * GET `/stop`
+   * Handles an application stop command.
+   *
+   * @return Redirect to landing page if successful.
+   */
+  def stop: Action[AnyContent] = Action { implicit request =>
     runner ! Stop
-    Ok(views.html.index("Stopped"))
+    Redirect(routes.HomeController.index())
+      .flashing("success" -> "Application stopped")
   }
 
 }

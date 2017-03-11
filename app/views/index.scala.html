@@ -14,8 +14,15 @@
 *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
+*
+*
+* Homepage / landing page.
+*
+* @param output The stdout result.
+* @param request The HTTP request.
+* @param flash The session flash.
 *@
-@(output: String = "")
+@(output: String = "")(implicit request: RequestHeader, flash: Flash)
 
 @main("Welcome to Play") {
 

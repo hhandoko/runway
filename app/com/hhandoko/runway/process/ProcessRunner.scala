@@ -19,12 +19,13 @@ package com.hhandoko.runway.process
 
 import scala.sys.process._
 
-import akka.actor.Actor
+import akka.actor.{Actor, ActorLogging}
 
 /**
  * Process runner actor.
  */
-class ProcessRunner extends Actor {
+class ProcessRunner extends Actor
+  with ActorLogging {
 
   import ProcessRunner._
 
@@ -32,11 +33,13 @@ class ProcessRunner extends Actor {
   val appPath = "../runway-0.1.0-SNAPSHOT"
 
   def receive: PartialFunction[Any, Unit] = {
-    case Run  =>
+    case Start  =>
+      log.info("Starting application")
       // TODO: Add port as Props args
       (appPath + "/bin/runway -Dhttp.port=8080 -Dplay.crypto.secret=S3cret").run
 
     case Stop =>
+      log.info("Stopping application")
       (("cat " + appPath + "/RUNNING_PID") #| "xargs kill -SIGTERM").run
   }
 
@@ -64,7 +67,7 @@ class ProcessRunner extends Actor {
  */
 object ProcessRunner {
 
-  case object Run
+  case object Start
   case object Stop
 
 }
