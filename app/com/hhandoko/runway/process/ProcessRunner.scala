@@ -24,23 +24,23 @@ import akka.actor.{Actor, ActorLogging}
 /**
  * Process runner actor.
  */
-class ProcessRunner extends Actor
+class ProcessRunner(path: String) extends Actor
   with ActorLogging {
 
   import ProcessRunner._
 
   // TODO: Add location as Props args
-  val appPath = "../runway-0.1.0-SNAPSHOT"
+  val relativePath = "../" + path
 
   def receive: PartialFunction[Any, Unit] = {
     case Start  =>
       log.info("Starting application")
       // TODO: Add port as Props args
-      (appPath + "/bin/runway -Dhttp.port=8080 -Dplay.crypto.secret=S3cret").run
+      (relativePath + "/bin/runway -Dhttp.port=8080 -Dplay.crypto.secret=S3cret").run
 
     case Stop =>
       log.info("Stopping application")
-      (("cat " + appPath + "/RUNNING_PID") #| "xargs kill -SIGTERM").run
+      (("cat " + relativePath + "/RUNNING_PID") #| "xargs kill -SIGTERM").run
   }
 
   /**

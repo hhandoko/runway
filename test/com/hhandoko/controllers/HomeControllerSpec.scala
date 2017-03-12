@@ -45,11 +45,18 @@ class HomeControllerSpec extends PlaySpec
 
     }
 
+    // TODO: Need to mock actor system
     "submitting start action" should {
 
-      // TODO: Need to mock actor system
-      "redirect to landing page if successful" in {
-        val url = routes.HomeController.start().url
+      val key = "runway"
+
+      "redirect to landing page with success message if successful" in {
+        val fixture = {
+          val addUrl = routes.HomeController.add().url
+          val addRequest = FakeRequest(GET, addUrl).withHeaders("Host" -> "localhost")
+          route(app, addRequest)
+        }
+        val url = routes.HomeController.start(key).url
         val request = FakeRequest(GET, url).withHeaders("Host" -> "localhost")
         val page = route(app, request).get
 
@@ -57,18 +64,43 @@ class HomeControllerSpec extends PlaySpec
         flash(page).data.values must contain("Application started")
       }
 
+      "redirect to landing page with error message if erroneous" in {
+        val url = routes.HomeController.start(key).url
+        val request = FakeRequest(GET, url).withHeaders("Host" -> "localhost")
+        val page = route(app, request).get
+
+        status(page) mustBe SEE_OTHER
+        flash(page).data.values must contain(s"Application with ID: '${key}' is not registered")
+      }
+
     }
 
     // TODO: Need to mock actor system
     "submitting stop action" should {
 
-      "redirect to landing page if successful" in {
-        val url = routes.HomeController.stop().url
+      val key = "runway"
+
+      "redirect to landing page with success message if successful" in {
+        val fixture = {
+          val addUrl = routes.HomeController.add().url
+          val addRequest = FakeRequest(GET, addUrl).withHeaders("Host" -> "localhost")
+          route(app, addRequest)
+        }
+        val url = routes.HomeController.stop(key).url
         val request = FakeRequest(GET, url).withHeaders("Host" -> "localhost")
         val page = route(app, request).get
 
         status(page) mustBe SEE_OTHER
         flash(page).data.values must contain("Application stopped")
+      }
+
+      "redirect to landing page with error message if erroneous" in {
+        val url = routes.HomeController.stop(key).url
+        val request = FakeRequest(GET, url).withHeaders("Host" -> "localhost")
+        val page = route(app, request).get
+
+        status(page) mustBe SEE_OTHER
+        flash(page).data.values must contain(s"Application with ID: '${key}' is not registered")
       }
 
     }

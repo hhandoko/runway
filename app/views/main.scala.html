@@ -36,12 +36,19 @@
     </head>
     <body>
         <a href="@appRoutes.HomeController.index">Home</a> |
-        <a href="@appRoutes.HomeController.start">Start</a> |
-        <a href="@appRoutes.HomeController.stop">Stop</a>
+        <a href="@appRoutes.HomeController.add">Add</a>
 
 
         @flash.get("success").map { msg =>
-            <div>@msg</div>
+            <div style="color: darkgreen">@msg</div>
+        }
+
+        @flash.get("warning").map { msg =>
+            <div style="color: darkorange">@msg</div>
+        }
+
+        @flash.get("error").map { msg =>
+            <div style="color: darkred">@msg</div>
         }
 
         @content

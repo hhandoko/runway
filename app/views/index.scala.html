@@ -18,20 +18,25 @@
 *
 * Homepage / landing page.
 *
-* @param output The stdout result.
+* @param apps The list of registered applications.
 * @param request The HTTP request.
 * @param flash The session flash.
 *@
-@(output: String = "")(implicit request: RequestHeader, flash: Flash)
+@import com.hhandoko.runway.controllers.{routes => appRoutes}
+@(apps: Iterable[String] = Nil)(implicit request: RequestHeader, flash: Flash)
 
 @main("Welcome to Play") {
 
     <h1>Welcome to Play!</h1>
 
-    @if(output.nonEmpty) {
+    @if(apps.nonEmpty) {
         <ul>
-            @for(line <- output.split("\n")) {
-                <li>@line</li>
+            @for(app <- apps) {
+                <li>@app
+                    [ <a href="@appRoutes.HomeController.start(app)">Start</a>
+                    | <a href="@appRoutes.HomeController.stop(app)">Stop</a>
+                    ]
+                </li>
             }
         </ul>
     }

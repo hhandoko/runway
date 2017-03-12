@@ -18,6 +18,7 @@
 package com.hhandoko.runway.controllers
 
 import javax.inject._
+import scala.collection.concurrent.TrieMap
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 import com.hhandoko.runway.process.ProcessRunner
@@ -33,8 +34,8 @@ import play.api.mvc._
 @Singleton
 class HomeController @Inject() (system: ActorSystem) extends Controller {
 
-  /** Process runner actor */
-  val runner: ActorRef = system.actorOf(Props[ProcessRunner], "runner")
+  /** Application name and value store */
+  val apps: TrieMap[String, ActorRef] = TrieMap.empty
 
   /**
    * GET `/`
@@ -42,31 +43,69 @@ class HomeController @Inject() (system: ActorSystem) extends Controller {
    * @return Homepage / landing page.
    */
   def index: Action[AnyContent] = Action { implicit request =>
-    Ok(views.html.index())
+    Ok(views.html.index(apps.keys))
   }
 
   /**
-   * GET `/start`
-   * Handles an application start command.
+   * GET `/add`
+   * Add a new application into the registry.
    *
    * @return Redirect to landing page if successful.
    */
-  def start: Action[AnyContent] = Action { implicit request =>
-    runner ! Start
-    Redirect(routes.HomeController.index())
-      .flashing("success" -> "Application started")
+  def add: Action[AnyContent] = Action { implicit request =>
+    val key  = "runway"
+    apps.get(key) match {
+      case Some(_) =>
+        Redirect(routes.HomeController.index())
+          .flashing("warning" -> s"Application with the ID: '${key}' is already registered")
+
+      case _ =>
+        apps += key -> system.actorOf(Props(new ProcessRunner(key + "-0.1.0-SNAPSHOT")), key)
+        Redirect(routes.HomeController.index())
+          .flashing("success" -> "Application added")
+    }
   }
 
   /**
-   * GET `/stop`
-   * Handles an application stop command.
+   * GET `/:key/start`
+   * Handles an application start command given an application key.
    *
+   * @param key The application key.
    * @return Redirect to landing page if successful.
    */
-  def stop: Action[AnyContent] = Action { implicit request =>
-    runner ! Stop
-    Redirect(routes.HomeController.index())
-      .flashing("success" -> "Application stopped")
+  // TODO: Convert to Form POST
+  def start(key: String): Action[AnyContent] = Action { implicit request =>
+    apps.get(key) match {
+      case Some(actor) =>
+        actor ! Start
+        Redirect(routes.HomeController.index())
+          .flashing("success" -> "Application started")
+
+      case _ =>
+        Redirect(routes.HomeController.index())
+          .flashing("error" -> s"Application with ID: '${key}' is not registered")
+    }
+  }
+
+  /**
+   * GET `/:key/stop`
+   * Handles an application stop command given an application key.
+   *
+   * @param key The application key.
+   * @return Redirect to landing page if successful.
+   */
+  // TODO: Convert to Form POST
+  def stop(key: String): Action[AnyContent] = Action { implicit request =>
+    apps.get(key) match {
+      case Some(actor) =>
+        actor ! Stop
+        Redirect(routes.HomeController.index())
+          .flashing("success" -> "Application stopped")
+
+      case _ =>
+        Redirect(routes.HomeController.index())
+          .flashing("error" -> s"Application with ID: '${key}' is not registered")
+    }
   }
 
 }

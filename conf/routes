@@ -26,8 +26,9 @@ GET     /assets/*file               controllers.Assets.versioned(path = "/public
 
 # Application Management
 # ~~~~~~
-GET     /start                      com.hhandoko.runway.controllers.HomeController.start
-GET     /stop                       com.hhandoko.runway.controllers.HomeController.stop
+GET     /add                        com.hhandoko.runway.controllers.HomeController.add
+GET     /:key/start                 com.hhandoko.runway.controllers.HomeController.start(key: String)
+GET     /:key/stop                  com.hhandoko.runway.controllers.HomeController.stop(key: String)
 
 # General
 # ~~~~~~
